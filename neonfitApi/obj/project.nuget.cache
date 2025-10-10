@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "XgDxcXUcTac=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Kavindu(KavinduSubas\\Documents\\GitHub\\gym-modern-website\\neonfitApi\\neonfitApi.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Kavindu(KavinduSubas\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.7\\microsoft.aspnetcore.openapi.9.0.7.nupkg.sha512",
+    "C:\\Users\\Kavindu(KavinduSubas\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
