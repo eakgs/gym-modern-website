@@ -1,0 +1,1 @@
+export const environment = { apiBase: 'https://your-prod-api.example.com' };
