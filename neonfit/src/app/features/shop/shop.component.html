@@ -1,0 +1,122 @@
+<!-- HERO STRIP -->
+<section class="hero">
+  <div class="hero__inner">
+    <div class="hero__text">
+      <h1 class="hero__title">Gear for the grind</h1>
+      <p class="hero__subtitle">Sweat-ready apparel, smart accessories, and lab-grade fuel — tuned for NEONFIT.</p>
+    </div>
+    <div class="hero__stats">
+      <div class="stat" *ngFor="let s of heroStats">
+        <div class="stat__val">{{ s.value }}</div>
+        <div class="stat__label">{{ s.label }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STICKY FILTER BAR -->
+<section class="bar">
+  <div class="bar__inner">
+    <div class="cats">
+      <button
+        *ngFor="let c of categories"
+        class="pill"
+        [class.pill--active]="cat() === c"
+        (click)="setCat(c)">
+        {{ c }}
+      </button>
+    </div>
+
+    <div class="tools">
+      <input type="search" class="ctrl" placeholder="Search"
+             [value]="q()" (input)="onSearch($event)" />
+      <select class="ctrl" [value]="sort()" (change)="onSort($event)">
+        <option value="popular">Popular</option>
+        <option value="price-asc">Price: low → high</option>
+        <option value="price-desc">Price: high → low</option>
+      </select>
+      <div class="ctrl ctrl--range">
+        <label>Max LKR {{ max() | currency:'':'':'1.0-0' }}</label>
+        <input type="range" min="1000" max="30000" step="100" [value]="max()" (input)="onMax($event)"/>
+      </div>
+      <button class="btn btn--ghost cartbtn" (click)="cartOpen.set(true)">
+        Cart • {{ cart.count() }} | {{ cart.total() | currency:'LKR':'symbol-narrow':'1.0-0' }}
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- GRID + CART OVERLAY -->
+<section class="wrap">
+  <div class="grid">
+    <article *ngFor="let p of list()" class="card">
+      <div class="img">
+        <span *ngIf="p.tag" class="ribbon">{{ p.tag }}</span>
+        <div class="img__ph" [style.backgroundImage]="'url(' + p.image + ')'"></div>
+      </div>
+
+      <div class="body">
+        <h3 class="name">{{ p.title }}</h3>
+        <div class="meta">
+          <div class="price">{{ p.price | currency:'LKR':'symbol-narrow':'1.0-0' }}</div>
+          <div class="cat">{{ p.category }}</div>
+        </div>
+
+        <div class="cols" *ngIf="p.colors?.length">
+          <span *ngFor="let c of p.colors" class="dot" [style.background]="c"></span>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn--primary" (click)="addToCart(p)">Add to cart</button>
+          <button class="btn btn--ghost">Details</button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="!list().length" class="empty">
+    No products match your filters.
+  </div>
+</section>
+
+<!-- OVERLAY CART (mobile friendly) -->
+<div class="overlay" [class.overlay--show]="cartOpen()" (click)="cartOpen.set(false)"></div>
+
+<aside class="drawer" [class.drawer--open]="cartOpen()">
+  <div class="drawer__head">
+    <h3>Cart</h3>
+    <button class="x" (click)="cartOpen.set(false)">×</button>
+  </div>
+
+  <div class="drawer__body" *ngIf="cart.items().length; else emptyCart">
+    <div class="row" *ngFor="let it of cart.items()">
+      <div class="thumb" [style.backgroundImage]="'url(' + it.image + ')'"></div>
+      <div class="info">
+        <div class="t">{{ it.title }}</div>
+        <div class="sub">{{ it.price | currency:'LKR':'symbol-narrow':'1.0-0' }}</div>
+        <div class="qty">
+          <button (click)="cart.setQty(it.id, it.qty - 1)">−</button>
+          <input type="number" [value]="it.qty" min="1" (input)="onQtyInput(it, $event)"/>
+          <button (click)="cart.setQty(it.id, it.qty + 1)">+</button>
+        </div>
+      </div>
+      <div class="sum">{{ (it.price * it.qty) | currency:'LKR':'symbol-narrow':'1.0-0' }}</div>
+      <button class="rm" title="Remove" (click)="cart.remove(it.id)">✕</button>
+    </div>
+  </div>
+
+  <ng-template #emptyCart>
+    <div class="drawer__empty">Your cart is empty.</div>
+  </ng-template>
+
+  <div class="drawer__foot">
+    <div class="totals">
+      <div>Total</div>
+      <div class="amt">{{ cart.total() | currency:'LKR':'symbol-narrow':'1.0-0' }}</div>
+    </div>
+    <div class="foot__actions">
+      <button class="btn btn--ghost" (click)="cart.clear()">Clear</button>
+      <button class="btn btn--primary" (click)="checkout()">Checkout</button>
+    </div>
+  </div>
+</aside>

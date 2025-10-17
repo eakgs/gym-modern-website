@@ -1,0 +1,62 @@
+/* page container width helper (matches Home) */
+.wrap{width:100%;max-width:72rem;margin:0 auto;padding:0 1rem}
+
+/* chips */
+.chip{
+  padding:.5rem .8rem;border-radius:9999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  transition:background .2s ease, border-color .2s ease, transform .15s ease;
+}
+.chip:hover{background:rgba(255,255,255,.10)}
+.chip--active{
+  background:linear-gradient(90deg,#34d399,#67e8f9);
+  color:#0b0b0c;border-color:transparent;
+}
+
+/* cards */
+.card{
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.25);
+  border-radius:1rem; overflow:hidden;
+  backdrop-filter: blur(6px);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.18);
+  box-shadow: 0 0 28px rgba(52,211,153,.18);
+}
+.card__img{
+  height:160px;background-size:cover;background-position:center;
+  filter: saturate(1.15) brightness(.9);
+  transition: transform .4s ease, filter .3s ease;
+}
+.card:hover .card__img{ transform: scale(1.03); filter: saturate(1.25) brightness(1.0); }
+
+/* tiny UX atoms */
+.pill{
+  font-size:.7rem; padding:.25rem .5rem; border-radius:.6rem;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06)
+}
+.badge{
+  padding:.25rem .5rem;border-radius:.5rem;
+  border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.06)
+}
+.tag{
+  font-size:.72rem;padding:.25rem .5rem;border-radius:.5rem;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)
+}
+.btn{
+  border-radius:.9rem;padding:.55rem .9rem;font-weight:600;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.12); }
+.btn--primary{
+  color:#0a0a0b;border:none;
+  background:linear-gradient(90deg,#34d399,#67e8f9);
+  box-shadow:0 0 20px rgba(52,211,153,.28);
+}
+.btn--primary:hover{ box-shadow:0 0 28px rgba(103,232,249,.38); transform: translateY(-1px); }

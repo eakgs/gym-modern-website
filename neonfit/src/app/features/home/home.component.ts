@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  // Subtle parallax, respects reduced motion (CSS disables animation)
+  // Subtle parallax; CSS respects prefers-reduced-motion
   @HostListener('window:scroll')
   onScroll() {
     const y = Math.min(window.scrollY || 0, 320);

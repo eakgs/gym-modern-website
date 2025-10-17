@@ -1,0 +1,104 @@
+<section class="wrap grid lg:grid-cols-[1fr_360px] gap-6">
+  <!-- Left: calendar + list -->
+  <div>
+    <header class="mb-4">
+      <h1 class="text-3xl font-extrabold">
+        Schedule <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300">This Week</span>
+      </h1>
+      <p class="text-white/70">Book live classes. Filter by type, availability, or search by coach.</p>
+    </header>
+
+    <!-- Date strip -->
+    <div class="date-strip">
+      <button
+        *ngFor="let d of days"
+        (click)="pick(d)"
+        class="date-pill"
+        [class.active]="dayKey(d) === dayKey(selectedDate())"
+      >
+        <div class="dow">{{ d | date:'EEE' }}</div>
+        <div class="day">{{ d | date:'d' }}</div>
+      </button>
+    </div>
+
+    <!-- Controls -->
+    <div class="grid sm:grid-cols-3 gap-3 mt-4">
+      <input
+        type="search"
+        [value]="q()"
+        (input)="onQuery($event)"
+        placeholder="Search classes or coach"
+        class="ctrl"
+      />
+      <select
+        class="ctrl"
+        [value]="filterType()"
+        (change)="onTypeChange($event)"
+      >
+        <option value="All">All types</option>
+        <option value="Strength">Strength</option>
+        <option value="HIIT">HIIT</option>
+        <option value="Mobility">Mobility</option>
+        <option value="Endurance">Endurance</option>
+        <option value="Dance">Dance</option>
+      </select>
+      <label class="ctrl flex items-center gap-2">
+        <input type="checkbox" [checked]="onlySpots()" (change)="onOnlySpotsChange($event)" />
+        <span>Only show open spots</span>
+      </label>
+    </div>
+
+    <!-- List -->
+    <div class="mt-6 space-y-3" *ngIf="classesForSelected().length; else empty">
+      <div *ngFor="let c of classesForSelected()" class="row">
+        <div class="time">{{ c.start | date:'EEE • h:mm a' }}</div>
+        <div class="main">
+          <div class="title">
+            <span class="type" [attr.data-type]="c.type">{{ c.type }}</span>
+            {{ c.title }}
+          </div>
+          <div class="sub">
+            {{ c.minutes }}m • Coach {{ c.coach }} • {{ c.room }}
+            <span class="spots" [class.low]="c.capacity - c.booked <= 3">
+              {{ c.capacity - c.booked }} spots left
+            </span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" (click)="book(c)">Book</button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #empty>
+      <div class="empty">No classes match your filters for this day.</div>
+    </ng-template>
+  </div>
+
+  <!-- Right: AI Coach -->
+  <aside class="coach">
+    <h3 class="title">AI Coach</h3>
+    <div class="tips">
+      <button (click)="quickPrompt('Goal: fat loss. I can train 4 days, mornings only.')">Fat loss • 4 mornings</button>
+      <button (click)="quickPrompt('Goal: strength. 3x after 6pm, add mobility on rest days.')">Strength • 3 evenings</button>
+      <button (click)="quickPrompt('Mixed: 2x HIIT, 1x mobility, 1x dance this week.')">Balanced week</button>
+    </div>
+
+    <div class="chat" id="chat">
+      <div *ngFor="let m of messages()" class="msg" [class.me]="m.role==='user'">
+        <div class="bubble">{{ m.content }}</div>
+      </div>
+    </div>
+
+    <form class="composer" (submit)="$event.preventDefault(); send();">
+      <input
+        type="text"
+        class="input"
+        placeholder="Tell me your goal + schedule (e.g., 4x mornings, fat loss)…"
+        [value]="draft()"
+        (input)="onDraftInput($event)"
+      />
+      <button class="send">Plan</button>
+    </form>
+  </aside>
+</section>

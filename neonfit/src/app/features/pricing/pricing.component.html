@@ -1,0 +1,113 @@
+<section class="wrap space-y-10">
+  <!-- Header -->
+  <header class="text-center">
+    <h1 class="text-3xl md:text-4xl font-extrabold">
+      Pick your <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300">power-up</span>
+    </h1>
+    <p class="text-white/70 mt-2">Simple plans in LKR. Switch anytime. Save with annual.</p>
+
+    <!-- Toggle -->
+    <div class="toggle mt-5 inline-flex">
+      <button
+        class="toggle__btn"
+        [class.toggle__btn--active]="period() === 'monthly'"
+        (click)="toggle('monthly')">
+        Monthly
+      </button>
+      <button
+        class="toggle__btn"
+        [class.toggle__btn--active]="period() === 'annual'"
+        (click)="toggle('annual')">
+        Annual <span class="save">Save ~15%</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Cards -->
+  <div class="grid md:grid-cols-3 gap-4">
+    <article *ngFor="let t of tiers" class="card" [class.card--featured]="t.badge === 'Best Value'">
+      <div class="card__ribbon" *ngIf="t.badge">{{ t.badge }}</div>
+
+      <div class="p-6">
+        <h3 class="title">{{ t.name }}</h3>
+        <p class="blurb">{{ t.blurb }}</p>
+
+        <div class="price">
+          <span class="cur">LKR</span>
+          <span class="amt">{{ priceFor(t) | number }}</span>
+          <span class="per">/mo</span>
+          <div class="hint" *ngIf="period() === 'annual'">Billed annually</div>
+        </div>
+
+        <ul class="list">
+          <li *ngFor="let f of t.features">✓ {{ f }}</li>
+          <li *ngFor="let e of t.extras" class="muted">+ {{ e }}</li>
+        </ul>
+
+        <div class="actions">
+          <button class="btn btn--primary" (click)="choose(t)">{{ t.cta }}</button>
+          <a routerLink="/programs" class="btn">See programs</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Comparison table -->
+  <section class="table-wrap">
+    <h2 class="section-title">Compare features</h2>
+    <div class="table">
+      <div class="row head">
+        <div class="cell feat">Feature</div>
+        <div class="cell tier">Starter</div>
+        <div class="cell tier">Athlete</div>
+        <div class="cell tier">Pro</div>
+      </div>
+
+      <div class="row" *ngFor="let f of tableRows().base">
+        <div class="cell feat">{{ f }}</div>
+        <div class="cell tier">✓</div>
+        <div class="cell tier">✓</div>
+        <div class="cell tier">✓</div>
+      </div>
+
+      <div class="row sep"><div class="cell" colspan="4"></div></div>
+
+      <div class="row" *ngFor="let e of tableRows().extra">
+        <div class="cell feat">{{ e }}</div>
+        <div class="cell tier">—</div>
+        <div class="cell tier" [class.dim]="e && e.includes('1:1')">✓</div>
+        <div class="cell tier">✓</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <h2 class="section-title">Common questions</h2>
+    <div class="qa">
+      <details>
+        <summary>Can I switch plans later?</summary>
+        <p>Yes. Upgrades prorate instantly; downgrades apply next cycle.</p>
+      </details>
+      <details>
+        <summary>Do you offer student or corporate discounts?</summary>
+        <p>We do. Bring valid ID (or HR letter) to the front desk or contact support.</p>
+      </details>
+      <details>
+        <summary>What’s included in Pro lab sessions?</summary>
+        <p>Body comp, lactate/VO₂ proxies, movement screen, and a coach consult.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta">
+    <div class="cta__inner">
+      <div>
+        <h3 class="cta__title">Ready to move in neon?</h3>
+        <p class="cta__text">Start with a 7-day trial. No pressure, just progress.</p>
+      </div>
+      <a routerLink="/signup" class="btn btn--primary">Start free trial</a>
+    </div>
+  </div>
+</section>

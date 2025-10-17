@@ -1,49 +1,156 @@
-// src/app/features/programs/programs.component.ts
-import { Component } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
+import { RouterLink } from '@angular/router';
+
+type Level = 'Beginner' | 'Intermediate' | 'Advanced';
+
+interface Program {
+  id: string;
+  title: string;
+  tagline: string;
+  minutes: number;
+  daysPerWeek: number;
+  level: Level;
+  tags: string[];
+  coach: string;
+  hero: string; // /assets/images/...
+}
 
 @Component({
   standalone: true,
   selector: 'nf-programs',
-  template: `
-    <section class="container py-16">
-      <h1 class="text-4xl font-extrabold mb-4 text-gradient">
-        Signature Programs
-      </h1>
-      <p class="text-white/70 max-w-xl mb-8">
-        Explore strength, mobility, HIIT, and dance labs engineered to
-        gamify performance.
-      </p>
-
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition">
-          <h3 class="font-semibold mb-1">Strength Lab</h3>
-          <p class="text-sm opacity-70">
-            Periodized lifting with live AI form feedback.
-          </p>
-        </div>
-        <div class="p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition">
-          <h3 class="font-semibold mb-1">Mobility Flow</h3>
-          <p class="text-sm opacity-70">
-            Restore range with dynamic stretch sessions.
-          </p>
-        </div>
-        <div class="p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition">
-          <h3 class="font-semibold mb-1">Dance Cardio</h3>
-          <p class="text-sm opacity-70">
-            Rhythm-based conditioning for endurance and fun.
-          </p>
-        </div>
-      </div>
-    </section>
-  `,
-  styles: [
-    `
-      .text-gradient {
-        background: linear-gradient(90deg, #34d399, #67e8f9);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-    `,
-  ],
+  imports: [NgFor, NgIf, RouterLink],
+  templateUrl: './programs.component.html',
+  styleUrls: ['./programs.component.css'],
 })
-export class ProgramsComponent {}
+export class ProgramsComponent {
+  // ---------------- Fake data (swap with API later) ----------------
+  readonly allPrograms: Program[] = [
+    {
+      id: 'strength-lab',
+      title: 'Strength Lab',
+      tagline: 'Periodized compound lifts with progressive overload',
+      minutes: 55,
+      daysPerWeek: 4,
+      level: 'Intermediate',
+      tags: ['Strength', 'Barbell', 'Hypertrophy'],
+      coach: 'Asha',
+      hero: '/assets/images/program-strength.jpg',
+    },
+    {
+      id: 'metabolic-burn',
+      title: 'Metabolic Burn',
+      tagline: 'HIIT intervals guided by live heart-rate zones',
+      minutes: 35,
+      daysPerWeek: 3,
+      level: 'Beginner',
+      tags: ['HIIT', 'Fat loss', 'Cardio'],
+      coach: 'Ravindu',
+      hero: '/assets/images/program-hiit.jpg',
+    },
+    {
+      id: 'mobility-flow',
+      title: 'Mobility Flow',
+      tagline: 'Restore range with joint cars, breath work & stretch',
+      minutes: 25,
+      daysPerWeek: 5,
+      level: 'Beginner',
+      tags: ['Mobility', 'Recovery', 'Low impact'],
+      coach: 'Imasha',
+      hero: '/assets/images/program-mobility.jpg',
+    },
+    {
+      id: 'athlete-engine',
+      title: 'Athlete Engine',
+      tagline: 'Power + speed + agility using plyos & sprints',
+      minutes: 45,
+      daysPerWeek: 4,
+      level: 'Advanced',
+      tags: ['Athleticism', 'Speed', 'Plyometrics'],
+      coach: 'Kavi',
+      hero: '/assets/images/program-athlete.jpg',
+    },
+    {
+      id: 'dance-cardio',
+      title: 'Dance Cardio',
+      tagline: 'Rhythm-driven sweat sessions for fun conditioning',
+      minutes: 40,
+      daysPerWeek: 3,
+      level: 'Beginner',
+      tags: ['Dance', 'Cardio', 'Fun'],
+      coach: 'Maya',
+      hero: '/assets/images/program-dance.jpg',
+    },
+    {
+      id: 'engine-cut',
+      title: 'Engine Cut',
+      tagline: 'Zone 2 base + tempo runs for aerobic engine',
+      minutes: 50,
+      daysPerWeek: 4,
+      level: 'Intermediate',
+      tags: ['Endurance', 'Running', 'Engine'],
+      coach: 'Dev',
+      hero: '/assets/images/program-engine.jpg',
+    },
+  ];
+
+  readonly allTags = [
+    'Strength', 'Hypertrophy', 'HIIT', 'Cardio', 'Mobility', 'Recovery',
+    'Athleticism', 'Speed', 'Dance', 'Endurance',
+  ];
+
+  // ---------------- Filters ----------------
+  q = signal<string>('');
+  tag = signal<string | null>(null);
+  level = signal<Level | 'All'>('All');
+  sort = signal<'popular' | 'minutes-asc' | 'minutes-desc'>('popular');
+
+  clearFilters() {
+    this.q.set('');
+    this.tag.set(null);
+    this.level.set('All');
+    this.sort.set('popular');
+  }
+
+  // Handlers (so we avoid casts in the template)
+  onQuery(e: Event) {
+    const value = (e.target as HTMLInputElement)?.value ?? '';
+    this.q.set(value);
+  }
+  onLevelChange(e: Event) {
+    const value = (e.target as HTMLSelectElement)?.value as Level | 'All';
+    this.level.set(value);
+  }
+  onSortChange(e: Event) {
+    const value = (e.target as HTMLSelectElement)?.value as 'popular' | 'minutes-asc' | 'minutes-desc';
+    this.sort.set(value);
+  }
+
+  // ---------------- Derived list ----------------
+  programs = computed(() => {
+    let list = [...this.allPrograms];
+
+    const q = this.q().trim().toLowerCase();
+    const tag = this.tag();
+    const level = this.level();
+
+    if (q) {
+      list = list.filter(p =>
+        p.title.toLowerCase().includes(q) ||
+        p.tagline.toLowerCase().includes(q) ||
+        p.tags.some(t => t.toLowerCase().includes(q)) ||
+        p.coach.toLowerCase().includes(q)
+      );
+    }
+    if (tag) list = list.filter(p => p.tags.includes(tag));
+    if (level !== 'All') list = list.filter(p => p.level === level);
+
+    switch (this.sort()) {
+      case 'minutes-asc':  list.sort((a,b) => a.minutes - b.minutes); break;
+      case 'minutes-desc': list.sort((a,b) => b.minutes - a.minutes); break;
+      default: /* popular */ break;
+    }
+
+    return list;
+  });
+}
