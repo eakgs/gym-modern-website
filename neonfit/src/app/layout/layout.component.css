@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+/* Fixed, page-wide background sitting behind all content */
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;                 /* behind navbar, pages, footer */
+  pointer-events: none;
+
+  /* Stack: (top → bottom) vignettes/tint, subtle grid/stripes, image */
+  background:
+    radial-gradient(1200px 700px at 85% 8%, rgba(34,211,238,.12), transparent 55%),
+    radial-gradient(1000px 650px at 15% 0%, rgba(163,230,53,.10), transparent 50%),
+    linear-gradient(180deg, rgba(0,0,0,.40), rgba(0,0,0,.80) 70%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.03) 0 1px,
+      transparent 1px 34px
+    ),
+    url("/assets/images/hero-bg.png");
+
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  background-position:
+    center top,
+    center top,
+    center top,
+    center top,
+    center top;
+
+  background-size:
+    cover,
+    cover,
+    cover,
+    auto,
+    cover;
+
+  filter: saturate(1.1) brightness(.92);
+  opacity: .35;                /* strength of the background — tweak to taste */
+}
+
+/* Optional: slight parallax for the image layer only on large screens */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .site-bg {
+    will-change: background-position;
+    animation: bgFloat 24s ease-in-out infinite alternate;
+  }
+  @keyframes bgFloat {
+    from { background-position:
+      center top,
+      center top,
+      center top,
+      center top,
+      50% 0%;
+    }
+    to   { background-position:
+      center top,
+      center top,
+      center top,
+      center top,
+      50% 8%;
+    }
+  }
+}
