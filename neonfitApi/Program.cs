@@ -1,74 +1,88 @@
-using Microsoft.AspNetCore.Mvc;
-using NeonFit.Api.Services;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using NeonFit.Api.Data;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --- Services --------------------------------------------------------------
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// DB (SQLite)
+var cs = builder.Configuration.GetConnectionString("db") ?? "Data Source=neonfit.db";
+builder.Services.AddDbContext<NeonFitDb>(o => o.UseSqlite(cs));
 
+// CORS for Angular dev
+builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
+    .WithOrigins("http://localhost:4200")
+    .AllowAnyHeader()
+    .AllowAnyMethod()));
 
-builder.Services.AddCors(options =>
-{
-options.AddPolicy("frontend", p => p
-.WithOrigins("http://localhost:4200")
-.AllowAnyHeader()
-.AllowAnyMethod());
-});
+// AuthN (JWT)
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-super-secret-change-me";
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o => o.TokenValidationParameters = new()
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = key
+    });
 
-
-// DI
-builder.Services.AddSingleton<SeedData>();
-builder.Services.AddSingleton<ProgramService>();
-builder.Services.AddSingleton<ScheduleService>();
-builder.Services.AddSingleton<BookingService>();
-
+// AuthZ (required if you call UseAuthorization)
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
-app.UseCors("frontend");
 
+// --- Middleware ------------------------------------------------------------
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+// --- Endpoints -------------------------------------------------------------
+app.MapGet("/", () => Results.Ok(new { ok = true, api = "NeonFit" }));
+
+// DTOs are in Contracts/AuthDtos.cs
+app.MapPost("/api/auth/register", async (NeonFitDb db, RegisterDto dto) =>
 {
-app.UseSwagger();
-app.UseSwaggerUI();
-}
+    var email = dto.Email.Trim().ToLowerInvariant();
+    if (await db.Users.AnyAsync(u => u.Email == email))
+        return Results.BadRequest(new { message = "Email already in use" });
 
-
-app.MapGet("/api/health", () => new { ok = true, time = DateTime.UtcNow });
-
-
-// Programs
-app.MapGet("/api/programs", ([FromServices] ProgramService svc) => Results.Ok(svc.GetPrograms()));
-
-
-// Schedule
-app.MapGet("/api/schedule", ([FromServices] ScheduleService svc) => Results.Ok(svc.GetToday()));
-
-
-// Booking
-app.MapPost("/api/booking", async ([FromBody] BookingRequest req, [FromServices] BookingService svc) =>
-{
-var result = await svc.BookAsync(req);
-return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+    var user = new User
+    {
+        Email = email,
+        Name = dto.Name?.Trim() ?? "",
+        PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+    };
+    db.Users.Add(user);
+    await db.SaveChangesAsync();
+    return Results.Ok(new { ok = true });
 });
 
+app.MapPost("/api/auth/login", async (NeonFitDb db, LoginDto dto) =>
+{
+    var email = dto.Email.Trim().ToLowerInvariant();
+    var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+    if (user is null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+        return Results.BadRequest(new { message = "Invalid credentials" });
 
-// AI Coach (stub)
-app.MapPost("/api/chat", ([FromBody] ChatMessage message) =>
-{
-// Replace with your real AI provider later
-var plan = new[]
-{
-"3x Strength (Mon/Wed/Fri)",
-"2x HIIT (Tue/Sat)",
-"Daily 10-min Mobility",
-"Protein ~1.6g/kg, Hydration 35ml/kg",
-"Sleep target 7.5h"
-};
-return Results.Ok(new { reply = string.Join("; ", plan) });
+    var token = CreateJwt(user.Id.ToString(), email, key);
+    return Results.Ok(new { token, user = new { user.Id, user.Email, user.Name } });
 });
-
 
 app.Run();
+
+// --- Helpers ---------------------------------------------------------------
+static string CreateJwt(string sub, string email, SymmetricSecurityKey k)
+{
+    var creds = new SigningCredentials(k, SecurityAlgorithms.HmacSha256);
+    var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
+        claims: [ new("sub", sub), new("email", email) ],
+        expires: DateTime.UtcNow.AddDays(7),
+        signingCredentials: creds
+    );
+    return new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(jwt);
+}

@@ -14,3 +14,22 @@ body { @apply bg-bg text-text font-sans; }
 .btn-ghost  { @apply btn bg-white/10 border border-line text-white hover:bg-white/15; }
 .card       { @apply glass rounded-2xl; }
 .container  { @apply max-w-6xl mx-auto px-4; }
+
+.magnetic {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .15s ease;
+}
+.magnetic:hover { transform: translateZ(6px); }
+.magnetic:active { transform: translateZ(2px) scale(.99); }
+
+/* Always reserve gutter and keep scroll on to prevent width shifts */
+html { scrollbar-gutter: stable both-edges; height: 100%; }
+body { overflow-y: scroll; min-height: 100%; }
+
+/* Prevent browser from auto-anchoring scroll between route swaps */
+html { overflow-anchor: none; }
+
+/* Never use 100vw for layout wrappers (causes extra width on Windows) */
+.w-screen, [style*="100vw"] { max-width: 100%; }
+

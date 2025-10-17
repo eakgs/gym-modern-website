@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("neonfitApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+23eb5ff50edf1b0696b0b09a12ab25af3720b5d3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b84c1c1c6df2f2bb9a683d450571e20aa5913aa1")]
 [assembly: System.Reflection.AssemblyProductAttribute("neonfitApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("neonfitApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
